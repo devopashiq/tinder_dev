@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 function capitalizeFirstLetter(value) {
   if (!value) return value;
@@ -25,7 +27,7 @@ const userSchema = new mongoose.Schema(
       maxLength: 10,
       set: capitalizeFirstLetter,
     },
-    about: { type: String, default: "This is default About" },
+    about: { type: String, default: "This is default About" ,maxLength:250},
     email: {
       type: String,
       lowercase: true,
@@ -66,5 +68,25 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.methods.getJWT=  function(){
+  
+  const user = this;
+
+ return token = jwt.sign({_id:user._id},"verySecret");
+ 
+
+
+}
+
+userSchema.methods.isPasswordValid= async function (inputPasswordByUser){
+  const user=this;
+
+const isPasswordValid =await bcrypt.compare(inputPasswordByUser, user.password);
+
+return isPasswordValid
+
+ 
+}
 
 module.exports = mongoose.model("User", userSchema);
