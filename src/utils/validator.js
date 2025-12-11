@@ -1,7 +1,7 @@
 
 const validator = require("validator");
 function signUpvalidator(req){
-    const {firstName,lastName,password,email,age} = req.body
+    const {firstName,lastName,password,email} = req.body
 
     if(!(firstName &&firstName.length>3)){
         throw new Error("Invalid First name")
@@ -11,7 +11,7 @@ function signUpvalidator(req){
     throw new Error("Invalid Email")
   }else if(!validator.isStrongPassword(password)){
     throw new Error 
-    ("Not Strong password")
+    ("Not a Strong password")
   }
 
 }

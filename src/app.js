@@ -1,8 +1,11 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
 const jwt = require("jsonwebtoken");
-
+const cors =require('cors')
 const { connection } = require("mongoose");
+
+
+
 
 
 
@@ -12,23 +15,36 @@ const User = require("./models/users.js");
 
 const {userAuth}= require("../src/middlewares/auth.js");
 
-const authRouter= require("./routes/auth.route.js")
-const profileRouter= require("./routes/profile.route.js")
+const authRouter= require("./routes/auth.route.js");
+const profileRouter= require("./routes/profile.route.js");
+const requestRouter = require("./routes/request.route.js");
+const userRouter = require("./routes/user.route.js");
+const mongoErrorHandling = require("./middlewares/mongoErrorHandling.js");
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  credentials: true,
+}));
 
 
 
 app.use("/",authRouter);
-console.log("ashiq 1");
+
 
 app.use("/",profileRouter);
+app.use("/",requestRouter);
+app.use("/",userRouter);
 
-
- 
+app.use(mongoErrorHandling)
+ app.use((err, req, res, next) => {
+  return res.status(400).json({
+    message: err.message,
+  });
+});
 
 
 app.get("/feed", async (req, res) => {
@@ -64,6 +80,7 @@ app.post("/SendRequestConnection",userAuth,(req,res)=>{
 
   }
 })
+
 
 connectDB()
   .then(() => {

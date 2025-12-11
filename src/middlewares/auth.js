@@ -1,4 +1,5 @@
 const User = require("../models/users");
+const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
 
 const userAuth = async (req, res, next) => {
   const jwt = require("jsonwebtoken");
@@ -7,13 +8,18 @@ const userAuth = async (req, res, next) => {
 
   try {
     if (!token) {
-      throw new Error("Token Not Found");
+      
+      return res.status(401).send("Please Login")
+
     }  
 
     const decodedToken = jwt.verify(token, "verySecret");
-    const { _id } = decodedToken;
-    const user = await User.findById({ _id });
 
+    const { _id } = decodedToken;
+
+    console.log(_id)
+    const user = await User.findById({ _id }).select(USER_SAFE_DATA);
+ console.log(_id,user)
     req.user = user;
     next();
   } catch (err) {

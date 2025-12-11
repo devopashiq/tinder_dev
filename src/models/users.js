@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 function capitalizeFirstLetter(value) {
   if (!value) return value;
@@ -16,7 +17,7 @@ const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      minLength: 1,
+      minLength: [3, "First name must be at least 3 characters long"],
       maxLength: 10,
       set: capitalizeFirstLetter,
       required: true,
@@ -32,8 +33,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       lowercase: true,
       trim: true,
-      required: true,
-      unique: true,
+      required: [true, "Email is required"],
+      unique:  true,
+      
     },
     password: {
       type: String,
@@ -41,25 +43,33 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      validate: (v) => {
-        if (v < 18) {
-          throw new Error("User age cannot  be less than 18");
-        }
-
-        return v;
-      },
-      required: true,
-    },
+      min: [18, "user must be 18 or older"],
+     
+     
+    }, 
     gender: {
       type: String,
-      required: true,
-      validate: (v) => {
-        const cleaned = v.toLowerCase();
-        if (!["male", "female", "other"].includes(cleaned)) {
-          throw new Error("please set gender in [male,female,other]");
+      enum: {values:["male", "female", "other"],
+        message: "{VALUE} is invalid gender type",
+         
+      },
+   
+      // validate: (v) => {
+      //   const cleaned = v.toLowerCase();
+      //   if (!["male", "female", "other"].includes(cleaned)) {
+      //     throw new Error("Please set gender in male,female,other");
+      //   }
+      // },
+    
+    },
+     photoUrl: {
+      type: String,
+      default: "https://geographyandyou.com/images/user-profile.png",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid Photo URL: " + value);
         }
       },
-      required: true,
     },
 
     skils: {
@@ -82,7 +92,12 @@ userSchema.methods.getJWT=  function(){
 userSchema.methods.isPasswordValid= async function (inputPasswordByUser){
   const user=this;
 
+
+  
+
 const isPasswordValid =await bcrypt.compare(inputPasswordByUser, user.password);
+
+
 
 return isPasswordValid
 

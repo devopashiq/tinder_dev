@@ -15,6 +15,8 @@
 
 module.exports = function isValidProfileFeilds(req) {
   const newProfile = req.body;
+  console.log(newProfile);
+  
 
   const allowedEditFeilds = [
     "firstName",
@@ -23,7 +25,9 @@ module.exports = function isValidProfileFeilds(req) {
     "email",
     "age",
     "skils",
-    "gender"
+    "gender",
+    'photoUrl'
+
   ];
  //"Object.keys" returns array key of object
  //"every" loop each item and "includes" 
