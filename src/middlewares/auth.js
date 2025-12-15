@@ -3,6 +3,7 @@ const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
 
 const userAuth = async (req, res, next) => {
   const jwt = require("jsonwebtoken");
+  console.log(req.cookies)
   //check if there token exist
   const { token } = req.cookies;
 
