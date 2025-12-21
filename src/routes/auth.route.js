@@ -32,9 +32,7 @@ router.post("/signup", async (req, res) => {
    const token = newUser.getJWT();
 
    res.cookie("token", token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: "lax",
+         
           maxAge: 7 * 24 * 60 * 60 * 1000, 
         });
   
@@ -65,9 +63,7 @@ router.post("/login", async (req, res) => {
         const safeUser = await User.findOne({ email }).select(USER_SAFE_DATA);
 
         res.cookie("token", token, {
-          httpOnly: true,
-          secure: false,
-          sameSite: "lax",
+       
           maxAge: 7 * 24 * 60 * 60 * 1000, 
         });
         res.status(200).json(safeUser);

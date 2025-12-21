@@ -14,14 +14,14 @@ const userAuth = async (req, res, next) => {
 
     }  
 
-    const decodedToken = jwt.verify(token, "verySecret");
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-    const { _id } = decodedToken;
+    const { _id } = decodedToken; 
 
     console.log(_id)
     const user = await User.findById({ _id }).select(USER_SAFE_DATA);
  console.log(_id,user)
-    req.user = user;
+    req.user = user; 
     next();
   } catch (err) {
     res.status(400).json("Error" + err.message);

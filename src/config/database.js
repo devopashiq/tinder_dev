@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
 await  mongoose.connect(
-     "mongodb+srv://mhdashiq88:j0HD4oKiKRCPoHxn@namastenode.re2lijx.mongodb.net/devTinder"
+      process.env.DB_CONNECTION_STRING,
   );
 };
 

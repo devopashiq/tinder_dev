@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const cors =require('cors')
 const { connection } = require("mongoose");
 
+require("dotenv").config();
 
 
 
@@ -81,14 +82,16 @@ app.post("/SendRequestConnection",userAuth,(req,res)=>{
   }
 })
 
+ 
+
 
 connectDB()
   .then(() => {
     console.log("Connected to MongoDB successfully!"),
       app.listen(7000, () => {
         console.log(`Server is Running Successfully in port 7000`);
-      });
+      }); 
 
-    console.log(connection.name);
+    console.log(connection.name); 
   })
   .catch((err) => console.error("Error connecting to MongoDB:", err));
