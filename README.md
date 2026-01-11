@@ -9,13 +9,13 @@ The application includes:
 - A **Node.js + Express backend** for APIs and business logic
 - A **MongoDB database** for persistent storage
 
-This project focuses on **real-world full-stack architecture**, clean APIs, authentication, and scalable design — not just UI screenshots.
+This project focuses on **real-world full-stack architecture**, clean APIs, authentication, and scalable design
 
 ---
 
 ## 🧠 What I Learned from This Project
 
-This project is not about building a toy app. It is about understanding how real backend systems work.
+
 
 Key learnings:
 - How Node.js actually works (event loop, async I/O)
@@ -50,5 +50,65 @@ Key learnings:
 
 ---
 
-## 📂 Project Structure
+
+---
+
+## 🔐 Authentication Flow
+
+- User registers with email & password
+- Password is hashed using **bcrypt**
+- JWT token is generated on login
+- Protected routes are secured using **JWT middleware**
+
+No shortcuts. This follows real industry standards.
+
+---
+
+## 🧩 Core Features
+
+### 👤 User
+- Sign up & login (frontend + backend)
+- JWT-based authentication
+- View & edit developer profile
+- Set and update **age**, bio, and profile image
+
+### 💘 Match System
+- Browse developers via **Feed Page**
+- Send connection requests
+- View incoming & outgoing requests
+- Accept / Reject requests
+- Prevent duplicate or invalid requests
+
+### 💬 Chat
+- One-to-one chat after mutual connection
+- Messages persisted in database
+- Access restricted to connected users only
+
+### 🔄 Frontend–Backend Integration
+- REST API consumption from React
+- Centralized auth handling
+- Protected routes on both frontend & backend
+
+### 🛡 Security
+- Password hashing with bcrypt
+- Token-based authentication
+- Protected API routes
+
+---
+
+## 🌱 Environment Variables
+
+Create a `.env` file in the root directory:
+
+
+DB_CONNECTION_STRING=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+
+## ▶️ How to Run Locally
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/your-username/tinder-dev-fullstack.git
+
+'''
 
