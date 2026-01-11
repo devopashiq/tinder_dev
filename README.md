@@ -1,4 +1,4 @@
-# Namaste Node.js – Tinder Dev Backend 🚀
+# Namaste Node.js – Tinder Dev
 
 A **full-stack web application** built while learning **Node.js** through **Namaste Node.js by Akshay Saini**.
 
