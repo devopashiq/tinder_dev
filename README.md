@@ -103,5 +103,5 @@ Create a `.env` file in the **root directory**:
 ```env
 DB_CONNECTION_STRING=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
-PORT=3000
+
 
