@@ -104,4 +104,19 @@ Create a `.env` file in the **root directory**:
 DB_CONNECTION_STRING=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 
+```
+
+## 📸 Screenshots
+
+| Feature                | Screenshot                                                                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Home Page**          | <img width="700" alt="Home Page" src="https://github.com/user-attachments/assets/e736798f-156e-47d6-84d5-3584a7a52d5c" />          |
+| **Login** | <img width="700" alt="Campground Details" src="https://github.com/user-attachments/assets/78303bd1-d4e8-4042-87b7-7cfadb830cdd" /> |
+| **Sign Up**     | <img width="700" alt="Add Campground" src="https://github.com/user-attachments/assets/024a73e3-bdc3-49b7-b344-b95a657b650f" />     |
+| **Request Page**    | <img width="700" alt="Map Integration" src="https://github.com/user-attachments/assets/84649f54-caf2-43d7-a7bc-21327d40ba19" />    |
+| **Connection Page**         | <img width="700" alt="Login Page" src="https://github.com/user-attachments/assets/dc7703ea-4a71-4eb4-a9f5-811ae9444574" />         |
+| **Chat  Page**         | <img width="700" alt="Login Page" src="https://github.com/user-attachments/assets/dc7703ea-4a71-4eb4-a9f5-811ae9444574" />         |
+
+---
+
 
