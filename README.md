@@ -98,17 +98,10 @@ No shortcuts. This follows real industry standards.
 
 ## 🌱 Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the **root directory**:
 
-
+```env
 DB_CONNECTION_STRING=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
-
-## ▶️ How to Run Locally
-
-### 1️⃣ Clone the repository
-```bash
-git clone https://github.com/your-username/tinder-dev-fullstack.git
-
-'''
+PORT=3000
 
