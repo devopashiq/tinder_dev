@@ -119,7 +119,7 @@ JWT_SECRET=your_secret_key
 | 5 | **Connection Page** | <img src="https://github.com/user-attachments/assets/5ecbe61a-7f7a-4d8c-9431-344fd3fae822" width="500" /> |
 | 6 | **Chat Page** | <img src="https://github.com/user-attachments/assets/5c2ef944-3009-48fb-9acc-735f765dafaa" width="500" /> |
 | 7 | **Profile Page** | <img src="https://github.com/user-attachments/assets/6f5c5ff2-ec8c-4c7d-9c82-e629c366e1b2" width="500" /> |
-|
+
 
 ---
 
