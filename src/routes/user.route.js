@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { userAuth } = require("../middlewares/auth");
 const connectionRequestmodel = require("../models/connectionRequest");
-
+const ExpressError=require('../utils/ExpressErrorHandler')
 const User = require("../models/users");
 
 const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
@@ -109,7 +109,7 @@ router.get("/feed", userAuth, async (req, res) => {
       hideUsersFromFeed.add(req.fromUserId.toString());
       hideUsersFromFeed.add(req.toUserId.toString());
     });
-    console.log(hideUsersFromFeed);
+    // console.log(hideUsersFromFeed);
 
     const users = await User.find({
       $and: [
@@ -142,5 +142,30 @@ router.get("/feed", userAuth, async (req, res) => {
     res.status(500).json("Error :" + err.message);
   }
 });
+
+
+router.get('/user/:userId',userAuth,async(req,res)=>{
+
+  try{
+
+    const userId = req.params.userId.trim();
+
+
+  const userDetails =await User.findById(userId).select(USER_SAFE_DATA)
+
+  res.status(200).json(userDetails)
+
+  }catch(err){
+     next(new ExpressError('Error in Finding User',400))
+    
+        
+
+  }
+
+
+  
+
+
+})
 
 module.exports = router;

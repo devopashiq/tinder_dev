@@ -26,7 +26,8 @@ const connectionRequestSchema = new mongoose.Schema({
       message: "{VALUE} is invalid status type",
     },
   },
-});
+  
+},{timestamps:true});
 
 
 connectionRequestSchema.index({
