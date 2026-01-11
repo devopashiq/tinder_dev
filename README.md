@@ -108,14 +108,18 @@ JWT_SECRET=your_secret_key
 
 ## 📸 Screenshots
 
-| Feature                | Screenshot                                                                                                                         |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Home Page**          | <img width="700" alt="Home Page" src="https://github.com/user-attachments/assets/e736798f-156e-47d6-84d5-3584a7a52d5c" />          |
-| **Login** | <img width="700" alt="Campground Details" src="https://github.com/user-attachments/assets/78303bd1-d4e8-4042-87b7-7cfadb830cdd" /> |
-| **Sign Up**     | <img width="700" alt="Add Campground" src="https://github.com/user-attachments/assets/024a73e3-bdc3-49b7-b344-b95a657b650f" />     |
-| **Request Page**    | <img width="700" alt="Map Integration" src="https://github.com/user-attachments/assets/84649f54-caf2-43d7-a7bc-21327d40ba19" />    |
-| **Connection Page**         | <img width="700" alt="Login Page" src="https://github.com/user-attachments/assets/dc7703ea-4a71-4eb4-a9f5-811ae9444574" />         |
-| **Chat  Page**         | <img width="700" alt="Login Page" src="https://github.com/user-attachments/assets/dc7703ea-4a71-4eb4-a9f5-811ae9444574" />         |
+## 📸 Application Screenshots
+
+| Step | Feature | Preview |
+|-----|--------|--------|
+| 1 | **Home Page** | <img src="https://github.com/user-attachments/assets/c1a36573-0911-4edc-81f8-5df2d748d3ad" width="500" /> |
+| 2 | **Sign Up** | <img src="https://github.com/user-attachments/assets/00a989d8-6418-4d74-a72f-78293dffcd45" width="500" /> |
+| 3 | **Login** | <img src="https://github.com/user-attachments/assets/83ceda68-b216-4755-91e3-510b85dd99be" width="500" /> |
+| 4 | **Request Page** | <img src="https://github.com/user-attachments/assets/6997b2b6-bed9-4a4d-a7cb-6e90311efb90" width="500" /> |
+| 5 | **Connection Page** | <img src="https://github.com/user-attachments/assets/5ecbe61a-7f7a-4d8c-9431-344fd3fae822" width="500" /> |
+| 6 | **Chat Page** | <img src="https://github.com/user-attachments/assets/5c2ef944-3009-48fb-9acc-735f765dafaa" width="500" /> |
+| 7 | **Profile Page** | <img src="https://github.com/user-attachments/assets/6f5c5ff2-ec8c-4c7d-9c82-e629c366e1b2" width="500" /> |
+|
 
 ---
 
