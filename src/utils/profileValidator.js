@@ -15,7 +15,7 @@
 
 module.exports = function isValidProfileFeilds(req) {
   const newProfile = req.body;
-  console.log(newProfile);
+  // console.log(newProfile);
   
 
   const allowedEditFeilds = [

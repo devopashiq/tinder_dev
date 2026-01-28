@@ -13,7 +13,7 @@ connectDB()
     
 seedUsers()
 
-    console.log(connection.name);
+    // console.log(connection.name);
   })
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 

@@ -6,7 +6,7 @@ const { subDays,startOfDay,endOfDay } = require("date-fns");
 
 
 
-const job = new CronJob(' * * * * *',async function(){
+const job = new CronJob('* * * * * *',async function(){
 
 
 
@@ -22,12 +22,12 @@ const endOfYesterday=endOfDay(yesterday);
         status:'interested'
     })
 
-    console.log(result);
+   //  console.log(result);
     
 
 
  }catch(err){
-    console.log(err);
+   //  console.log(err);
     
  }
 

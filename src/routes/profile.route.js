@@ -31,15 +31,15 @@ router.patch("/profile/edit", userAuth, async (req, res,next) => {
     const updateUser = req.body;
     
 
-    console.log(loggedUser, "before");
-    console.log(updateUser, "update");
+    // console.log(loggedUser, "before");
+    // console.log(updateUser, "update");
 
     Object.keys(updateUser).forEach((key) => {
       loggedUser[key] = updateUser[key];
     });
  
    const data= await loggedUser.save();
-   console.log(data);
+  //  console.log(data);
    
 
     res.status(200).json({

@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { userAuth } = require("../middlewares/auth");
 const connectionRequestmodel = require("../models/connectionRequest");
-const ExpressError=require('../utils/ExpressErrorHandler')
+const ExpressError = require("../utils/ExpressErrorHandler");
 const User = require("../models/users");
+const { route } = require("./auth.route");
 
 const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
 
@@ -12,7 +13,7 @@ router.get("/user/request/received", userAuth, async (req, res) => {
     //validate user
 
     const loginedUser = req.user;
-    console.log(loginedUser);
+    // console.log(loginedUser);
 
     const requests = await connectionRequestmodel
       .find({
@@ -53,7 +54,7 @@ router.get("/user/connection", userAuth, async (req, res) => {
       .populate("fromUserId", USER_SAFE_DATA)
       .populate("toUserId", USER_SAFE_DATA);
 
-    console.log(connectionRequest);
+    // console.log(connectionRequest);
 
     const data = connectionRequest.map((row) => {
       if (loggedUserId.toString() === row.toUserId._id.toString()) {
@@ -73,20 +74,15 @@ router.get("/user/connection", userAuth, async (req, res) => {
   }
 });
 
-router.get("/feed", userAuth, async (req, res) => {
+router.get("user/feed", userAuth, async (req, res) => {
   try {
-    
-    const page = parseInt(req.query.page )|| 1;
+    const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 2;
 
-   
-    
+    limit = limit > 50 ? 50 : limit;
+    const skip = (page - 1) * limit;
 
-    limit= limit>50?50:limit;
-    const skip = (page-1)*limit;
-
-     console.log(page,limit,skip);
-
+    //  console.log(page,limit,skip);
 
     const logginedUser = req.user;
 
@@ -101,8 +97,7 @@ router.get("/feed", userAuth, async (req, res) => {
           },
         ],
       })
-      .select("fromUserId toUserId")
-      
+      .select("fromUserId toUserId");
 
     const hideUsersFromFeed = new Set();
     connectionRequests.forEach((req) => {
@@ -124,16 +119,14 @@ router.get("/feed", userAuth, async (req, res) => {
           },
         },
       ],
-   
-       
-          // _id: {
-          //   $nin: Array.from(hideUsersFromFeed), $ne: logginedUser._id
-          // },
-        
-       
-    }).select(USER_SAFE_DATA)
-    .skip(skip)
-    .limit(limit)
+
+      // _id: {
+      //   $nin: Array.from(hideUsersFromFeed), $ne: logginedUser._id
+      // },
+    })
+      .select(USER_SAFE_DATA)
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       users,
@@ -144,28 +137,31 @@ router.get("/feed", userAuth, async (req, res) => {
 });
 
 
-router.get('/user/:userId',userAuth,async(req,res)=>{
+router.get("/user/:userId", userAuth, async (req, res) => {
+  try {
+    const userId = req.params.userId.trim();
 
-  try{
+    const userDetails = await User.findById(userId).select(USER_SAFE_DATA);
 
+    res.status(200).json(userDetails);
+  } catch (err) {
+    next(new ExpressError("Error in Finding User", 400));
+  }
+});
+
+router.get("/user/:userId/status", userAuth, async (req, res) => {
+  try {
     const userId = req.params.userId.trim();
 
 
-  const userDetails =await User.findById(userId).select(USER_SAFE_DATA)
+    const userLastSeen = await User.findById(userId).select('lastSeen');
 
-  res.status(200).json(userDetails)
-
-  }catch(err){
-     next(new ExpressError('Error in Finding User',400))
-    
-        
-
+    res.status(200).json(userLastSeen);
+  } catch (err) {
+    next(new ExpressError("Error in Finding User", 400));
   }
+});
 
 
-  
-
-
-})
 
 module.exports = router;

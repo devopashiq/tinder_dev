@@ -19,12 +19,15 @@ const profileRouter = require("./routes/profile.route.js");
 const requestRouter = require("./routes/request.route.js");
 const userRouter = require("./routes/user.route.js");
 const mongoErrorHandling = require("./middlewares/mongoErrorHandling.js");
-const initializeSocket = require("./utils/socket.js");
+const {initializeSocket} = require("./utils/socket.js");
 const chatRouter = require("./routes/chat.route.js");
+const PaymentRouter = require("./routes/payment.route.js");
 
 const app = express();
+app.use("/webhook/razorpay", express.raw({ type: "application/json" }));
 
 app.use(express.json());
+
 app.use(cookieParser());
 app.use(
   cors({
@@ -42,6 +45,7 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", chatRouter);
+app.use("/", PaymentRouter );
 
 
 app.use(mongoErrorHandling);

@@ -91,7 +91,7 @@ router.patch("/user/:userId", async (req, res) => {
     const userId = req.params.userId.trim();
     const data = req.body;
 
-    console.log(userId);
+    // console.log(userId);
 
     const notAllowedFields = ["email"];
 
@@ -109,7 +109,7 @@ router.patch("/user/:userId", async (req, res) => {
 });
 
 router.delete("/user/:userId", async (req, res) => {
-  console.log(req.cookies);
+  // console.log(req.cookies);
   try {
     const userId = req.params.userId.trim();
     const user = await User.findById(userId);

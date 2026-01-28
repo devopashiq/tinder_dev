@@ -75,6 +75,10 @@ const userSchema = new mongoose.Schema(
     skils: {
       type: [String],
     },
+    lastSeen:{
+      type:Date,
+      default:null
+    }
   },
   { timestamps: true }
 );

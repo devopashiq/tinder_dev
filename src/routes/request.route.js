@@ -55,7 +55,7 @@ router.post("/request/send/:status/:userId", userAuth, async (req, res) => {
     await connection.save();
     const mail = await run();
 
-    console.log(mail);
+    // console.log(mail);
     
     
 
@@ -89,7 +89,7 @@ router.post(
           message: "Invalid status type",
         });
       }
-      console.log(requestId);
+      // console.log(requestId);
       
 
       const connectionRequest = await connectionRequestmodel.findOne({
