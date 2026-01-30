@@ -52,25 +52,51 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", async (socket) => {
-    console.log(socket.user, "a user is connected");
-    console.log(socket);
+   
     onlineUsers.set(socket.id, socket.user._id);
-      socket.user.lastSeen = null;
-    const result=  await socket.user.save();
-    console.log(result,'eeeeeeeeeeeeee');
-    
+
+  
 
     io.emit("online-users", Array.from(onlineUsers.values()));
-    console.log("online users,", Array.from(onlineUsers.values()));
+
 
     // io.emit("user-online", socket.user?._id);
+  
 
-    socket.on("joinChat", ({ userId, targetUserId, username }) => {
-      console.log(userId, targetUserId, username);
+    socket.on("joinChat", async({ userId, targetUserId, username }) => {
+      console.log(userId, targetUserId, username, "sundraaa");
       const roomId = [userId, targetUserId].sort().join("-");
 
       socket.join(roomId);
+
+        let chat = await chatModal.findOne({
+            participants: {
+              $all: [userId, targetUserId],
+            },
+          });
+          if(chat){
+            const chatId= chat._id
+            console.log(chatId);
+
+
+          await  chatModal.updateOne({
+            _id:chatId
+          },{
+            $set:{
+              "message.$[elem].status":'seen',
+              "message.$[elem].seenAt":new Date()
+
+            }
+          },{
+             arrayFilters: [ { "elem.senderId": { $ne: socket.user._id } ,
+            "elem.status": { $ne: 'seen' } } ]
+          }
+        )
+          }
     });
+
+
+
     socket.on(
       "sendMessage",
       async ({ userId, targetUserId, username, newmessages }) => {
@@ -80,7 +106,7 @@ const initializeSocket = (server) => {
           text: newmessages,
           userId,
         });
-        console.log(newmessages, "this ....");
+     
 
         try {
           let chat = await chatModal.findOne({
@@ -88,6 +114,30 @@ const initializeSocket = (server) => {
               $all: [userId, targetUserId],
             },
           });
+        //   if(chat){
+        //     const chatId= chat._id
+        //     console.log(chatId);
+
+
+        //   await  chatModal.updateOne({
+        //     _id:chatId
+        //   },{
+        //     $set:{
+        //       "message.$[elem].status":'seen',
+        //       "message.$[elem].seenAt":new Date()
+
+        //     }
+        //   },{
+        //      arrayFilters: [ { "elem.senderId": { $ne: socket.user._id } ,
+        //     "elem.status": { $ne: 'seen' } } ]
+        //   }
+        // )
+        //   }
+
+        
+          
+
+         
 
           if (!chat) {
             chat = new chatModal({
@@ -103,19 +153,21 @@ const initializeSocket = (server) => {
 
           await chat.save();
         } catch (err) {
-          console.log(err); 
+          console.log(err);
         }
       },
     );
+    socket.user.lastSeen = null;
+    const result = await socket.user.save();
 
     socket.on("disconnect", async () => {
       console.log("A user disconnected");
       socket.user.lastSeen = new Date();
-     const result= await socket.user.save();
-        console.log(result,'eeeeeeeeeeeeee');
+      const result = await socket.user.save();
+     
       onlineUsers.delete(socket.id);
       io.emit("online-users", Array.from(onlineUsers.values()));
-      console.log("online users,", Array.from(onlineUsers.values()));
+    
     });
   });
 };
