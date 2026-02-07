@@ -8,7 +8,7 @@ const messageScheme = new mongoose.Schema(
       required: true,
     },
     text: { type: String },
-    status: { type: String, enum: ["seen", "delivered"], default: "delivered" },
+    status: { type: String, enum: ["sent","seen", "delivered"], default: "sent" },
     seenAt:{type:Date}
   },
   { timestamps: true },

@@ -7,6 +7,7 @@ const User = require("../models/users");
 const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
 
 const onlineUsers = new Map();
+const ActiveChats = new Map();
 
 const initializeSocket = (server) => {
   const io = socket(server, {
@@ -40,6 +41,9 @@ const initializeSocket = (server) => {
       const { _id } = decodedToken;
 
       const user = await User.findById({ _id }).select(USER_SAFE_DATA);
+      if (!user) {
+        return next(new ExpressError("User not found", 401));
+      }
       //  console.log(user);
 
       socket.user = user;
@@ -52,122 +56,145 @@ const initializeSocket = (server) => {
   });
 
   io.on("connection", async (socket) => {
-   
-    onlineUsers.set(socket.id, socket.user._id);
-
-  
-
-    io.emit("online-users", Array.from(onlineUsers.values()));
+    onlineUsers.set(socket.user._id.toString(), socket.id);
+    io.emit("online-users", Array.from(onlineUsers.keys()));
 
 
-    // io.emit("user-online", socket.user?._id);
-  
 
-    socket.on("joinChat", async({ userId, targetUserId, username }) => {
-      console.log(userId, targetUserId, username, "sundraaa");
-      const roomId = [userId, targetUserId].sort().join("-");
+    socket.on("joinChat", async ({ targetUserId }) => {
+      const userId = socket.user._id.toString();
+      const targetId = targetUserId.toString();
+      const roomId = [userId, targetId].sort().join("-");
 
       socket.join(roomId);
 
-        let chat = await chatModal.findOne({
-            participants: {
-              $all: [userId, targetUserId],
+      if (!ActiveChats.has(roomId)) {
+        ActiveChats.set(roomId, new Set());
+      }
+
+      ActiveChats.get(roomId).add(userId);
+
+      io.to(roomId).emit("userjoined", userId);
+
+      let chat = await chatModal.findOne({
+        participants: {
+          $all: [userId, targetId],
+        },
+      });
+      if (chat) {
+        const chatId = chat._id;
+        console.log(chatId);
+
+        await chatModal.updateOne(
+          {
+            _id: chatId,
+          },
+          {
+            $set: {
+              "message.$[elem].status": "seen",
+              "message.$[elem].seenAt": new Date(),
             },
+          },
+          {
+            arrayFilters: [
+              {
+                "elem.senderId": { $ne: userId },
+                "elem.status": { $ne: "seen" },
+              },
+            ],
+          },
+        );
+      }
+    });
+
+    socket.on("sendMessage", async ({ targetUserId, newmessages }) => {
+      const roomId = [socket.user._id.toString(), targetUserId.toString()]
+        .sort()
+        .join("-");
+
+      let status = "sent";
+
+      if (
+        ActiveChats.has(roomId) &&
+        ActiveChats.get(roomId).has(targetUserId.toString())
+      ) {
+        status = "seen";
+      } else if (onlineUsers.has(targetUserId.toString())) {
+        status = "delivered";
+      }
+
+      try {
+        const userId = socket.user._id.toString();
+        const targetId = targetUserId.toString();
+
+        let chat = await chatModal.findOne({
+          participants: {
+            $all: [userId, targetId],
+          },
+        });
+
+        if (!chat) {
+          chat = new chatModal({
+            participants: [userId, targetId],
+            message: [],
           });
-          if(chat){
-            const chatId= chat._id
-            console.log(chatId);
+        }
 
+        chat.message.push({
+          senderId: userId,
+          text: newmessages,
+          status,
+          seenAt: status === "seen" ? new Date() : null,
+        });
 
-          await  chatModal.updateOne({
-            _id:chatId
-          },{
-            $set:{
-              "message.$[elem].status":'seen',
-              "message.$[elem].seenAt":new Date()
+       const chatResult = await chat.save();
+       const message = chatResult.message[chatResult.message.length-1]
+       
 
-            }
-          },{
-             arrayFilters: [ { "elem.senderId": { $ne: socket.user._id } ,
-            "elem.status": { $ne: 'seen' } } ]
-          }
-        )
-          }
+        io.to(roomId).emit("chatMessage", {
+          text: message.text,
+          userId: message.senderId.toString(),
+          status: message.status,
+          seenAt: message.seenAt,
+          createdAt: message.createdAt
+      
+
+        });
+      } catch (err) {
+        console.log(err);
+      }
     });
 
 
-
-    socket.on(
-      "sendMessage",
-      async ({ userId, targetUserId, username, newmessages }) => {
-        const roomId = [userId, targetUserId].sort().join("-");
-        io.to(roomId).emit("chatMessage", {
-          username,
-          text: newmessages,
-          userId,
-        });
-     
-
-        try {
-          let chat = await chatModal.findOne({
-            participants: {
-              $all: [userId, targetUserId],
-            },
-          });
-        //   if(chat){
-        //     const chatId= chat._id
-        //     console.log(chatId);
+    socket.on('UserTyping',async ({typing,targetUserId})=>{
+       const roomId = [socket.user._id.toString(), targetUserId.toString()]
+        .sort()
+        .join("-");
+      console.log(typing,"user typing");
+      
+      socket.to(roomId).emit('typing',typing)
+    })
+ 
 
 
-        //   await  chatModal.updateOne({
-        //     _id:chatId
-        //   },{
-        //     $set:{
-        //       "message.$[elem].status":'seen',
-        //       "message.$[elem].seenAt":new Date()
 
-        //     }
-        //   },{
-        //      arrayFilters: [ { "elem.senderId": { $ne: socket.user._id } ,
-        //     "elem.status": { $ne: 'seen' } } ]
-        //   }
-        // )
-        //   }
 
-        
-          
 
-         
-
-          if (!chat) {
-            chat = new chatModal({
-              participants: [userId, targetUserId],
-              message: [],
-            });
-          }
-
-          chat.message.push({
-            senderId: userId,
-            text: newmessages,
-          });
-
-          await chat.save();
-        } catch (err) {
-          console.log(err);
-        }
-      },
-    );
-    socket.user.lastSeen = null;
-    const result = await socket.user.save();
 
     socket.on("disconnect", async () => {
       console.log("A user disconnected");
       socket.user.lastSeen = new Date();
       const result = await socket.user.save();
-     
-      onlineUsers.delete(socket.id);
-      io.emit("online-users", Array.from(onlineUsers.values()));
-    
+
+      onlineUsers.delete(socket.user._id.toString());
+
+      for (const [roomId, users] of ActiveChats) {
+        users.delete(socket.user._id.toString());
+        if (users.size === 0) {
+          ActiveChats.delete(roomId);
+        }
+      }
+      io.emit("online-users", Array.from(onlineUsers.keys()));
     });
   });
 };
