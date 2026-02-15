@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const mongoErrorHandling = require('../middlewares/mongoErrorHandling')
 
 const { userAuth } = require("../middlewares/auth");
 const profileEditeValidator = require("../utils/profileValidator");

@@ -18,7 +18,7 @@ const authRouter = require("./routes/auth.route.js");
 const profileRouter = require("./routes/profile.route.js");
 const requestRouter = require("./routes/request.route.js");
 const userRouter = require("./routes/user.route.js");
-const mongoErrorHandling = require("./middlewares/mongoErrorHandling.js");
+
 const {initializeSocket} = require("./utils/socket.js");
 const chatRouter = require("./routes/chat.route.js");
 const PaymentRouter = require("./routes/payment.route.js");
@@ -48,7 +48,7 @@ app.use("/", chatRouter);
 app.use("/", PaymentRouter );
 
 
-app.use(mongoErrorHandling);
+// app.use(mongoErrorHandling);
 
 //Error middleWare
 
