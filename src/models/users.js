@@ -28,14 +28,13 @@ const userSchema = new mongoose.Schema(
       maxLength: 10,
       set: capitalizeFirstLetter,
     },
-    about: { type: String, default: "This is default About" ,maxLength:250},
+    about: { type: String, default: "This is default About", maxLength: 250 },
     email: {
       type: String,
       lowercase: true,
       trim: true,
       required: [true, "Email is required"],
-      unique:  true,
-      
+      unique: true,
     },
     password: {
       type: String,
@@ -44,25 +43,29 @@ const userSchema = new mongoose.Schema(
     age: {
       type: Number,
       min: [18, "user must be 18 or older"],
-     
-     
-    }, 
+    },
     gender: {
       type: String,
-      enum: {values:["male", "female", "other"],
+      enum: {
+        values: ["male", "female", "other"],
         message: "{VALUE} is invalid gender type",
-         
       },
-   
+
       // validate: (v) => {
       //   const cleaned = v.toLowerCase();
       //   if (!["male", "female", "other"].includes(cleaned)) {
       //     throw new Error("Please set gender in male,female,other");
       //   }
       // },
-    
     },
-     photoUrl: {
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+    },
+    photoUrl: {
       type: String,
       default: "https://geographyandyou.com/images/user-profile.png",
       validate(value) {
@@ -75,37 +78,29 @@ const userSchema = new mongoose.Schema(
     skils: {
       type: [String],
     },
-    lastSeen:{
-      type:Date,
-      default:null
-    }
+    lastSeen: {
+      type: Date,
+      default: null,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-userSchema.methods.getJWT=  function(){
-  
+userSchema.methods.getJWT = function () {
   const user = this;
 
- return token = jwt.sign({_id:user._id},"verySecret");
- 
+  return (token = jwt.sign({ _id: user._id }, "verySecret"));
+};
 
+userSchema.methods.isPasswordValid = async function (inputPasswordByUser) {
+  const user = this;
 
-}
+  const isPasswordValid = await bcrypt.compare(
+    inputPasswordByUser,
+    user.password,
+  );
 
-userSchema.methods.isPasswordValid= async function (inputPasswordByUser){
-  const user=this;
-
-
-  
-
-const isPasswordValid =await bcrypt.compare(inputPasswordByUser, user.password);
-
-
-
-return isPasswordValid
-
- 
-}
+  return isPasswordValid;
+};
 
 module.exports = mongoose.model("User", userSchema);

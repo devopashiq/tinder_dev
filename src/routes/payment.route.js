@@ -7,6 +7,7 @@ const paymentModal = require("../models/payment");
 const {
   validateWebhookSignature,
 } = require("razorpay/dist/utils/razorpay-utils");
+const User = require("../models/users");
 
 const razorpay = new Razorpay({
   key_id: process.env.RZP_KEY_ID,
@@ -53,10 +54,10 @@ router.post("/payment/order", userAuth, async (req, res, next) => {
 
 router.post("/webhook/razorpay", async (req, res) => {
   try {
-    // console.log("testing..........");
+    console.log("testing..........");
 
-    // console.log(req.headers, req.body);
-    // console.log('entring verification');
+    console.log(req.headers, req.body);
+    console.log('entring verification');
     
 
     const razorpaySignature = req.header("X-Razorpay-Signature");
@@ -69,27 +70,42 @@ router.post("/webhook/razorpay", async (req, res) => {
       razorpaySignature,
       webhookSecret
     );
-    //    console.log(razorpaySignature,webhookSecret);
+       console.log(razorpaySignature,webhookSecret);
 
-    //  console.log('verification result',iswebhookValid);
+          
+
+     console.log('verification resulthhhhh',iswebhookValid);
 
     if (!iswebhookValid) {
       return res.status(400).json({ message: "Invalid Request" });
     }
+
     
-    if (req.body.event === "payment.captured") {
+     const body = JSON.parse(req.body.toString());
+    console.log(body);
+    if (body.event === "payment.captured") {
+      console.log('payment captured');
+      
       const payment = await paymentModal.findOne({
-        razorpayOrderId: req.body.payload.payment.entity.order_id,
+        razorpayOrderId: body.payload.payment.entity.order_id,
       });
 
+        console.log('payment captured',payment);
+
       if (payment) {
+        console.log('paid now making user to premium');
+        
         payment.paymentstatus = "success";
         await payment.save();
 
         //TODO: update user premium status
+
+        const user = await User.findById(payment.user);
+        user.isPremium=true
+        await user.save();
       }
     }
-    if (req.body.event === "payment.failed") {
+    if (body.event === "payment.failed") {
       const payment = await paymentModal.findOne({
         razorpayOrderId: req.body.payload.payment.entity.order_id,
       });

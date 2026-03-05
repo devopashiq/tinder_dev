@@ -74,7 +74,7 @@ router.get("/user/connection", userAuth, async (req, res) => {
   }
 });
 
-router.get("user/feed", userAuth, async (req, res) => {
+router.get("/user/feed", userAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 2;
@@ -132,6 +132,8 @@ router.get("user/feed", userAuth, async (req, res) => {
       users,
     });
   } catch (err) {
+    console.log(err);
+    
     res.status(500).json("Error :" + err.message);
   }
 });

@@ -6,7 +6,7 @@ const User = require("../models/users.js");
 const signUpvalidator = require("../utils/validator.js");
 const e = require("express");
 
-const USER_SAFE_DATA = "firstName lastName about age skill gender photoUrl";
+const USER_SAFE_DATA = "firstName lastName about age skill gender photoUrl membershipType isPremium";
 
 router.post("/signup", async (req, res) => {
   const { firstName, lastName, password, email} = req.body;
