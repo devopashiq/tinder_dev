@@ -17,7 +17,6 @@ const razorpay = new Razorpay({
 router.post("/payment/order", userAuth, async (req, res, next) => {
   const user = req.user;
   const { type } = req.body;
-  // console.log(req.body, user);
 
   try {
     const transactionId = `trn_${Date.now()}`;
@@ -44,7 +43,6 @@ router.post("/payment/order", userAuth, async (req, res, next) => {
 
     await payment.save();
 
-    // console.log(order);
     res.json(order);
   } catch (err) {
     console.log(err);
@@ -54,60 +52,41 @@ router.post("/payment/order", userAuth, async (req, res, next) => {
 
 router.post("/webhook/razorpay", async (req, res) => {
   try {
-    console.log("testing..........");
-
-    console.log(req.headers, req.body);
-    console.log('entring verification');
-    
-
     const razorpaySignature = req.header("X-Razorpay-Signature");
 
- 
-    
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const iswebhookValid = validateWebhookSignature(
       req.body.toString(),
       razorpaySignature,
-      webhookSecret
+      webhookSecret,
     );
-       console.log(razorpaySignature,webhookSecret);
-
-          
-
-     console.log('verification resulthhhhh',iswebhookValid);
 
     if (!iswebhookValid) {
       return res.status(400).json({ message: "Invalid Request" });
     }
 
-    
-     const body = JSON.parse(req.body.toString());
-    console.log(body);
+    const body = JSON.parse(req.body.toString());
+
     if (body.event === "payment.captured") {
-      console.log('payment captured');
-      
       const payment = await paymentModal.findOne({
         razorpayOrderId: body.payload.payment.entity.order_id,
       });
 
-        console.log('payment captured',payment);
-
       if (payment) {
-        console.log('paid now making user to premium');
-        
         payment.paymentstatus = "success";
         await payment.save();
 
-        //TODO: update user premium status
-
         const user = await User.findById(payment.user);
-        user.isPremium=true
-        await user.save();
+        if (user) {
+          user.isPremium = true;
+          user.membershipType = payment.membership;
+          await user.save();
+        }
       }
     }
     if (body.event === "payment.failed") {
       const payment = await paymentModal.findOne({
-        razorpayOrderId: req.body.payload.payment.entity.order_id,
+        razorpayOrderId: body.payload.payment.entity.order_id,
       });
 
       if (payment) {

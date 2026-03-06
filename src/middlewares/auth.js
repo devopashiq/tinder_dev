@@ -1,11 +1,10 @@
 const User = require("../models/users");
 const USER_SAFE_DATA =
-  "firstName lastName about age skill gender photoUrl membershipType isPremium";
+  "firstName lastName about age skils gender photoUrl membershipType isPremium";
 
 const userAuth = async (req, res, next) => {
   const jwt = require("jsonwebtoken");
-  console.log("hello");
-  //check if there token exist
+  console.log("hello"); //check if there token exist
   const { token } = req.cookies;
 
   try {
@@ -14,17 +13,20 @@ const userAuth = async (req, res, next) => {
     }
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decodedToken);
 
     const { _id } = decodedToken;
 
-    
     const user = await User.findById(_id).select(USER_SAFE_DATA);
-    console.log(user,"user deatis");
-    
-    //  console.log(_id,user)
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login",
+      });
+    }
+
     req.user = user;
-    next(); 
+    next();
   } catch (err) {
     console.log(err);
 

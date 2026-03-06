@@ -13,7 +13,7 @@ router.get("/user/request/received", userAuth, async (req, res) => {
     //validate user
 
     const loginedUser = req.user;
-    // console.log(loginedUser);
+  
 
     const requests = await connectionRequestmodel
       .find({
@@ -54,7 +54,7 @@ router.get("/user/connection", userAuth, async (req, res) => {
       .populate("fromUserId", USER_SAFE_DATA)
       .populate("toUserId", USER_SAFE_DATA);
 
-    // console.log(connectionRequest);
+ 
 
     const data = connectionRequest.map((row) => {
       if (loggedUserId.toString() === row.toUserId._id.toString()) {
@@ -82,7 +82,7 @@ router.get("/user/feed", userAuth, async (req, res) => {
     limit = limit > 50 ? 50 : limit;
     const skip = (page - 1) * limit;
 
-    //  console.log(page,limit,skip);
+
 
     const logginedUser = req.user;
 
@@ -104,7 +104,7 @@ router.get("/user/feed", userAuth, async (req, res) => {
       hideUsersFromFeed.add(req.fromUserId.toString());
       hideUsersFromFeed.add(req.toUserId.toString());
     });
-    // console.log(hideUsersFromFeed);
+    
 
     const users = await User.find({
       $and: [

@@ -10,32 +10,24 @@ const ChatRouter = express.Router();
 ChatRouter.get("/chat/:targetUserId", userAuth, async (req, res, next) => {
   const userId = req.user._id;
   const targetUserId = req.params.targetUserId;
-  
+
   try {
-
-    console.log(!isValidObjectId(targetUserId));
-    
     if (!isValidObjectId(targetUserId)) {
-        console.log('inside validation');
-        
-     return next(new ExpressError("Invalid Id", 400));
-    } 
-
-
-    console.log('after validation');
-    
-    const connection = await connectionRequestmodel.findOne({
-     $or: [
-        {fromUserId:userId,toUserId:targetUserId,status:'accepted'},
-        {fromUserId:targetUserId,toUserId:userId,status:'accepted'}
-     ]
-    }); 
-
-    if(!connection){
-        return next (new ExpressError('Your are not connected with this user',400))
+      return next(new ExpressError("Invalid Id", 400));
     }
 
- 
+    const connection = await connectionRequestmodel.findOne({
+      $or: [
+        { fromUserId: userId, toUserId: targetUserId, status: "accepted" },
+        { fromUserId: targetUserId, toUserId: userId, status: "accepted" },
+      ],
+    });
+
+    if (!connection) {
+      return next(
+        new ExpressError("Your are not connected with this user", 400),
+      );
+    }
 
     let chat = await chatModal
       .findOne({

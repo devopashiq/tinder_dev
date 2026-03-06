@@ -7,12 +7,9 @@ const profileEditeValidator = require("../utils/profileValidator");
 
 const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
 
-router.get("/profile/view", userAuth,async (req, res) => {
+router.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
-  
-
-
 
     res.status(200).send(user);
   } catch (err) {
@@ -20,7 +17,7 @@ router.get("/profile/view", userAuth,async (req, res) => {
   }
 });
 
-router.patch("/profile/edit", userAuth, async (req, res,next) => {
+router.patch("/profile/edit", userAuth, async (req, res, next) => {
   try {
     if (!profileEditeValidator(req)) {
       throw new Error("Contians Invalid Feilds");
@@ -28,31 +25,24 @@ router.patch("/profile/edit", userAuth, async (req, res,next) => {
 
     const loggedUser = req.user;
     const updateUser = req.body;
-    
-
-    // console.log(loggedUser, "before");
-    // console.log(updateUser, "update");
 
     Object.keys(updateUser).forEach((key) => {
       loggedUser[key] = updateUser[key];
     });
- 
-   const data= await loggedUser.save();
-  //  console.log(data);
-   
+
+    const data = await loggedUser.save();
 
     res.status(200).json({
-      msg: "updated the profile successfully"
-      ,data}
-    );
+      msg: "updated the profile successfully",
+      data,
+    });
   } catch (err) {
-      next(err)
-      
+    next(err);
   }
 });
 
 router.patch("/profile/password", userAuth, async (req, res) => {
-  try { 
+  try {
     const user = req.user;
 
     const { currentPassword, newPassword } = req.body;
