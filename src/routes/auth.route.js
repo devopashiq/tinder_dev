@@ -6,7 +6,7 @@ const User = require("../models/users.js");
 const signUpvalidator = require("../utils/validator.js");
 const e = require("express");
 
-const USER_SAFE_DATA = "firstName lastName about age skill gender photoUrl";
+const USER_SAFE_DATA = "firstName lastName about age skils gender photoUrl membershipType isPremium";
 
 router.post("/signup", async (req, res) => {
   const { firstName, lastName, password, email} = req.body;
@@ -48,7 +48,7 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try { 
-    console.log(req.body);
+ 
 
     const { email, password } = req.body;
 
@@ -91,7 +91,6 @@ router.patch("/user/:userId", async (req, res) => {
     const userId = req.params.userId.trim();
     const data = req.body;
 
-    // console.log(userId);
 
     const notAllowedFields = ["email"];
 
@@ -109,7 +108,7 @@ router.patch("/user/:userId", async (req, res) => {
 });
 
 router.delete("/user/:userId", async (req, res) => {
-  // console.log(req.cookies);
+ 
   try {
     const userId = req.params.userId.trim();
     const user = await User.findById(userId);

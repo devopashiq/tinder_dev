@@ -44,8 +44,7 @@ const initializeSocket = (server) => {
       if (!user) {
         return next(new ExpressError("User not found", 401));
       }
-      //  console.log(user);
-
+     
       socket.user = user;
       next();
     } catch (err) {
@@ -83,7 +82,7 @@ const initializeSocket = (server) => {
       });
       if (chat) {
         const chatId = chat._id;
-        console.log(chatId);
+     
 
         await chatModal.updateOne(
           {
@@ -170,7 +169,7 @@ const initializeSocket = (server) => {
        const roomId = [socket.user._id.toString(), targetUserId.toString()]
         .sort()
         .join("-");
-      console.log(typing,"user typing");
+     
       
       socket.to(roomId).emit('typing',typing)
     })
@@ -182,7 +181,7 @@ const initializeSocket = (server) => {
 
 
     socket.on("disconnect", async () => {
-      console.log("A user disconnected");
+    
       socket.user.lastSeen = new Date();
       const result = await socket.user.save();
 
