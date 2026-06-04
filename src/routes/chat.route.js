@@ -4,10 +4,11 @@ const { userAuth } = require("../middlewares/auth");
 const connectionRequestmodel = require("../models/connectionRequest");
 const { isValidObjectId } = require("mongoose");
 const ExpressError = require("../utils/ExpressErrorHandler");
+const isPremiumUser = require("../middlewares/isPremiumUser");
 
 const ChatRouter = express.Router();
 
-ChatRouter.get("/chat/:targetUserId", userAuth, async (req, res, next) => {
+ChatRouter.get("/chat/:targetUserId", userAuth,isPremiumUser, async (req, res, next) => {
   const userId = req.user._id;
   const targetUserId = req.params.targetUserId;
 

@@ -4,7 +4,7 @@ const USER_SAFE_DATA =
 
 const userAuth = async (req, res, next) => {
   const jwt = require("jsonwebtoken");
-  console.log("hello"); //check if there token exist
+
   const { token } = req.cookies;
 
   try {

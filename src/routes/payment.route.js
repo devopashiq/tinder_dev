@@ -23,7 +23,7 @@ router.post("/payment/order", userAuth, async (req, res, next) => {
     //the amount need convert smallest sub-unit (india 1rs means 100 paisa)
     //500rs = 50000 paisa(500rs *100 Paisa)
     const order = await razorpay.orders.create({
-      amount: type === "Silver" ? 50000 : 100000,
+      amount: type === "Silver" ? 49900 : 99900,
       currency: "INR",
       receipt: transactionId,
       notes: {

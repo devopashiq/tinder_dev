@@ -44,6 +44,9 @@ const initializeSocket = (server) => {
       if (!user) {
         return next(new ExpressError("User not found", 401));
       }
+      if(user.isPremium === false){
+        return next(new ExpressError("You are not a premium user", 401));
+      }
      
       socket.user = user;
       next();
