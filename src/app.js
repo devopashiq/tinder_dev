@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "tinder-dev-frontend-kappa.vercel.app",
+    origin: "https://tinder-dev-frontend-dun.vercel.app",
     credentials: true,
   })
 ); 
