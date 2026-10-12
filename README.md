@@ -43,6 +43,7 @@ Key learnings:
 - **Mongoose** – ODM for MongoDB
 - **JWT** – Authentication
 - **bcrypt** – Password hashing
+-  **Web socket** – real time chats
 
 ### Tools
 - **Postman** – API testing
