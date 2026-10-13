@@ -1,169 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const { userAuth } = require("../middlewares/auth");
-const connectionRequestmodel = require("../models/connectionRequest");
-const ExpressError = require("../utils/ExpressErrorHandler");
-const User = require("../models/users");
-const { route } = require("./auth.route");
+const {
+  getReceivedRequests,
+  getConnections,
+  getFeed,
+  getUserById,
+  getUserStatus,
+} = require("../controllers/user.controller");
 
-const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
+router.get("/user/request/received", userAuth, getReceivedRequests);
 
-router.get("/user/request/received", userAuth, async (req, res) => {
-  try {
-    //validate user
+router.get("/user/connection", userAuth, getConnections);
 
-    const loginedUser = req.user;
-  
+router.get("/user/feed", userAuth, getFeed);
 
-    const requests = await connectionRequestmodel
-      .find({
-        toUserId: loginedUser._id,
-        status: "interested",
-      })
-      .populate("fromUserId", USER_SAFE_DATA);
+router.get("/user/:userId", userAuth, getUserById);
 
-    res.status(200).json({
-      data: requests,
-    });
-
-    //get request that status inteseted
-    //to user should be the logined user
-  } catch (err) {
-    res.status(500).json("Error: " + err.message);
-  }
-});
-
-router.get("/user/connection", userAuth, async (req, res) => {
-  try {
-    const loggedUserId = req.user._id;
-
-    //get all connection with status if logger user is fromuser id or touserid
-    const connectionRequest = await connectionRequestmodel
-      .find({
-        $or: [
-          {
-            fromUserId: loggedUserId,
-            status: "accepted",
-          },
-          {
-            toUserId: loggedUserId,
-            status: "accepted",
-          },
-        ],
-      })
-      .populate("fromUserId", USER_SAFE_DATA)
-      .populate("toUserId", USER_SAFE_DATA);
-
- 
-
-    const data = connectionRequest.map((row) => {
-      if (loggedUserId.toString() === row.toUserId._id.toString()) {
-        return row.fromUserId;
-      } else {
-        return row.toUserId;
-      }
-    });
-
-    res.status(200).json({
-      data,
-    });
-
-    //if fromuser ==logger user id then return touser details else from user detaisl
-  } catch (err) {
-    res.status(500).json("Error :" + err.message);
-  }
-});
-
-router.get("/user/feed", userAuth, async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    let limit = parseInt(req.query.limit) || 2;
-
-    limit = limit > 50 ? 50 : limit;
-    const skip = (page - 1) * limit;
-
-
-
-    const logginedUser = req.user;
-
-    const connectionRequests = await connectionRequestmodel
-      .find({
-        $or: [
-          {
-            fromUserId: logginedUser._id,
-          },
-          {
-            toUserId: logginedUser._id,
-          },
-        ],
-      })
-      .select("fromUserId toUserId");
-
-    const hideUsersFromFeed = new Set();
-    connectionRequests.forEach((req) => {
-      hideUsersFromFeed.add(req.fromUserId.toString());
-      hideUsersFromFeed.add(req.toUserId.toString());
-    });
-    
-
-    const users = await User.find({
-      $and: [
-        {
-          _id: {
-            $nin: Array.from(hideUsersFromFeed),
-          },
-        },
-        {
-          _id: {
-            $ne: logginedUser._id,
-          },
-        },
-      ],
-
-      // _id: {
-      //   $nin: Array.from(hideUsersFromFeed), $ne: logginedUser._id
-      // },
-    })
-      .select(USER_SAFE_DATA)
-      .skip(skip)
-      .limit(limit);
-
-    res.status(200).json({
-      users,
-    });
-  } catch (err) {
-    console.log(err);
-    
-    res.status(500).json("Error :" + err.message);
-  }
-});
-
-
-router.get("/user/:userId", userAuth, async (req, res) => {
-  try {
-    const userId = req.params.userId.trim();
-
-    const userDetails = await User.findById(userId).select(USER_SAFE_DATA);
-
-    res.status(200).json(userDetails);
-  } catch (err) {
-    next(new ExpressError("Error in Finding User", 400));
-  }
-});
-
-router.get("/user/:userId/status", userAuth, async (req, res) => {
-  try {
-    const userId = req.params.userId.trim();
-
-
-    const userLastSeen = await User.findById(userId).select('lastSeen');
-
-    res.status(200).json(userLastSeen);
-  } catch (err) {
-    next(new ExpressError("Error in Finding User", 400));
-  }
-});
-
-
+router.get("/user/:userId/status", userAuth, getUserStatus);
 
 module.exports = router;
