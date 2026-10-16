@@ -27,3 +27,4 @@ async function seedUsers() {
     console.log(err);
   }
 }
+

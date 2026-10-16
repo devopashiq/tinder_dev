@@ -9,6 +9,9 @@ const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
 const onlineUsers = new Map();
 const ActiveChats = new Map();
 
+//storing online users
+//readed the message in active chats
+
 const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
@@ -40,18 +43,31 @@ const initializeSocket = (server) => {
       const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
       const { _id } = decodedToken;
 
-      const user = await User.findById({ _id }).select(USER_SAFE_DATA);
+      const user = await User.findById({ _id }).select(
+        USER_SAFE_DATA + "isPremium",
+      );
+
       if (!user) {
         return next(new ExpressError("User not found", 401));
       }
-      if(user.isPremium === false){
+      if (user.isPremium !== true) {
         return next(new ExpressError("You are not a premium user", 401));
       }
-     
+
       socket.user = user;
       next();
     } catch (err) {
-      console.log(err);
+      if (err.name === "TokenExpiredError") {
+        next(new ExpressError("Token is expired", 401));
+      }
+
+      if (err.name === "JsonWebTokenError") {
+        next(new ExpressError("Invalid token", 401));
+      }
+
+      if (err.name === "NotBeforeError") {
+        next(new ExpressError("Invalid token", 401));
+      }
 
       next(new ExpressError(err.message, 500));
     }
@@ -60,8 +76,6 @@ const initializeSocket = (server) => {
   io.on("connection", async (socket) => {
     onlineUsers.set(socket.user._id.toString(), socket.id);
     io.emit("online-users", Array.from(onlineUsers.keys()));
-
-
 
     socket.on("joinChat", async ({ targetUserId }) => {
       const userId = socket.user._id.toString();
@@ -85,7 +99,6 @@ const initializeSocket = (server) => {
       });
       if (chat) {
         const chatId = chat._id;
-     
 
         await chatModal.updateOne(
           {
@@ -149,42 +162,30 @@ const initializeSocket = (server) => {
           seenAt: status === "seen" ? new Date() : null,
         });
 
-       const chatResult = await chat.save();
-       const message = chatResult.message[chatResult.message.length-1]
-       
+        const chatResult = await chat.save();
+        const message = chatResult.message[chatResult.message.length - 1];
 
         io.to(roomId).emit("chatMessage", {
           text: message.text,
           userId: message.senderId.toString(),
           status: message.status,
           seenAt: message.seenAt,
-          createdAt: message.createdAt
-      
-
+          createdAt: message.createdAt,
         });
       } catch (err) {
         console.log(err);
       }
     });
 
-
-    socket.on('UserTyping',async ({typing,targetUserId})=>{
-       const roomId = [socket.user._id.toString(), targetUserId.toString()]
+    socket.on("UserTyping", async ({ typing, targetUserId }) => {
+      const roomId = [socket.user._id.toString(), targetUserId.toString()]
         .sort()
         .join("-");
-     
-      
-      socket.to(roomId).emit('typing',typing)
-    })
- 
 
-
-
-
-
+      socket.to(roomId).emit("typing", typing);
+    });
 
     socket.on("disconnect", async () => {
-    
       socket.user.lastSeen = new Date();
       const result = await socket.user.save();
 
