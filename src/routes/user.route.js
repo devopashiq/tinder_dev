@@ -9,14 +9,14 @@ const {
   getUserStatus,
 } = require("../controllers/user.controller");
 
-router.get("/user/request/received", userAuth, getReceivedRequests);
+router.get("/request/received", userAuth, getReceivedRequests);
 
-router.get("/user/connection", userAuth, getConnections);
+router.get("/connection", userAuth, getConnections);
 
-router.get("/user/feed", userAuth, getFeed);
+router.get("/feed", userAuth, getFeed);
 
-router.get("/user/:userId", userAuth, getUserById);
+router.get("/:userId", userAuth, getUserById);
 
-router.get("/user/:userId/status", userAuth, getUserStatus);
+router.get("/:userId/status", userAuth, getUserStatus);
 
 module.exports = router;

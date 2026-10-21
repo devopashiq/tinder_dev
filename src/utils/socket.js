@@ -26,10 +26,7 @@ const initializeSocket = (server) => {
 
       if (!rawCookie) {
         return next(
-          new ExpressError(
-            '"Authentication required. Please login again."',
-            401,
-          ),
+          new ExpressError("Authentication required. Please login again.", 401),
         );
       }
 
@@ -44,7 +41,7 @@ const initializeSocket = (server) => {
       const { _id } = decodedToken;
 
       const user = await User.findById({ _id }).select(
-        USER_SAFE_DATA + "isPremium",
+        USER_SAFE_DATA + " isPremium",
       );
 
       if (!user) {
@@ -186,20 +183,30 @@ const initializeSocket = (server) => {
     });
 
     socket.on("disconnect", async () => {
-      socket.user.lastSeen = new Date();
-      const result = await socket.user.save();
+      try {
+        await User.updateOne(
+          { _id: socket.user._id },
+          { $set: { lastSeen: new Date() } },
+        );
+      } catch (err) {
+        console.error("Failed to update lastSeen:", err);
+      } finally {
+        onlineUsers.delete(socket.user._id.toString());
 
-      onlineUsers.delete(socket.user._id.toString());
+        for (const [roomId, users] of ActiveChats) {
+          users.delete(socket.user._id.toString());
 
-      for (const [roomId, users] of ActiveChats) {
-        users.delete(socket.user._id.toString());
-        if (users.size === 0) {
-          ActiveChats.delete(roomId);
+          if (users.size === 0) {
+            ActiveChats.delete(roomId);
+          }
         }
+
+        io.emit("online-users", Array.from(onlineUsers.keys()));
       }
-      io.emit("online-users", Array.from(onlineUsers.keys()));
     });
   });
+
+  return io;
 };
 
 module.exports = { initializeSocket, onlineUsers };
