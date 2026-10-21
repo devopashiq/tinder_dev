@@ -94,7 +94,7 @@ describe("Socket.IO authentication middleware", () => {
 
     await new Promise((resolve, reject) => {
       socket.once("connect_error", () => {
-        reject(new Error("Connection should have been Rejected"));
+        reject(new Error("Connection should have been Accepted"));
       });
       socket.once("connect", resolve);
     });
@@ -115,7 +115,7 @@ describe("Socket.IO authentication middleware", () => {
     const error = await new Promise((resolve, reject) => {
       socket.once("connect_error", resolve);
       socket.once("connect", () => {
-        reject(new Error("Connection should have been Accepted"));
+        reject(new Error("Connection should have been Rejected"));
       });
     });
 
@@ -134,9 +134,9 @@ describe("Socket.IO authentication middleware", () => {
     });
 
    const error= await new Promise((resolve, reject) => {
-        socket.once("connect",);() => {
+        socket.once("connect",() => {
         reject(new Error("Connection should have been Rejected"));
-      }
+      });
       socket.once("connect_error", resolve );
     
     });
@@ -157,9 +157,9 @@ describe("Socket.IO authentication middleware", () => {
     });
 
    const error= await new Promise((resolve, reject) => {
-        socket.once("connect",);() => {
+         socket.once("connect",() => {
         reject(new Error("Connection should have been Rejected"));
-      }
+      });
       socket.once("connect_error", resolve );
     
     });

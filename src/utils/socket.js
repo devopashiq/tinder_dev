@@ -55,18 +55,18 @@ const initializeSocket = (server) => {
       next();
     } catch (err) {
       if (err.name === "TokenExpiredError") {
-        next(new ExpressError("Token is expired", 401));
+        return next(new ExpressError("Token is expired", 401));
       }
 
       if (err.name === "JsonWebTokenError") {
-        next(new ExpressError("Invalid token", 401));
+        return next(new ExpressError("Invalid token", 401));
       }
 
       if (err.name === "NotBeforeError") {
-        next(new ExpressError("Invalid token", 401));
+        return next(new ExpressError("Invalid token", 401));
       }
 
-      next(new ExpressError(err.message, 500));
+      return next(new ExpressError(err.message, 500));
     }
   });
 
