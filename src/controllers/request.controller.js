@@ -2,7 +2,7 @@ const { run } = require("../utils/sendEmail");
 const User = require("../models/users.js");
 const connectionRequestmodel = require("../models/connectionRequest");
 
-module.exports.sendConnectionRequest = async (req, res) => {
+module.exports.sendConnectionRequest = async (req, res, next) => {
   try {
     const status = req.params.status;
     const toUserId = req.params.userId;
@@ -53,12 +53,11 @@ module.exports.sendConnectionRequest = async (req, res) => {
           : req.user.firstName + ` ${status} `) + toUserExist.firstName,
     });
   } catch (err) {
-    res.status(500).send("Error: " + err.message);
-    console.log(err);
+    next(err);
   }
 };
 
-module.exports.reviewConnectionRequest = async (req, res) => {
+module.exports.reviewConnectionRequest = async (req, res, next) => {
   try {
     const loggedUserId = req.user._id;
     const status = req.params.status;
@@ -92,7 +91,6 @@ module.exports.reviewConnectionRequest = async (req, res) => {
       data,
     });
   } catch (err) {
-    res.status(500).send("Error: " + err.message);
-    console.log(err);
+    next(err);
   }
 };

@@ -1,20 +1,21 @@
 const bcrypt = require("bcrypt");
 const profileEditeValidator = require("../utils/profileValidator");
+const ExpressError = require("../utils/ExpressErrorHandler");
 
-module.exports.viewProfile = async (req, res) => {
+module.exports.viewProfile = async (req, res, next) => {
   try {
     const user = req.user;
 
     res.status(200).send(user);
   } catch (err) {
-    res.status(500).send("Error: " + err.message);
+    next(err);
   }
 };
 
 module.exports.editProfile = async (req, res, next) => {
   try {
     if (!profileEditeValidator(req)) {
-      throw new Error("Contians Invalid Feilds");
+      throw new ExpressError("Profile contains fields that cannot be updated", 400);
     }
 
     const loggedUser = req.user;
@@ -35,7 +36,7 @@ module.exports.editProfile = async (req, res, next) => {
   }
 };
 
-module.exports.changePassword = async (req, res) => {
+module.exports.changePassword = async (req, res, next) => {
   try {
     const user = req.user;
 
@@ -51,10 +52,9 @@ module.exports.changePassword = async (req, res) => {
 
       res.status(200).send("password chnaged");
     } else {
-      throw new Error("invalid passwords");
+      throw new ExpressError("Current password is incorrect", 401);
     }
   } catch (err) {
-    res.status(500).send("Error: " + err.message);
-    console.log(err);
+    next(err);
   }
 };

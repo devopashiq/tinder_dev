@@ -4,7 +4,7 @@ const User = require("../models/users");
 
 const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
 
-module.exports.getReceivedRequests = async (req, res) => {
+module.exports.getReceivedRequests = async (req, res, next) => {
   try {
     const loginedUser = req.user;
 
@@ -19,11 +19,11 @@ module.exports.getReceivedRequests = async (req, res) => {
       data: requests,
     });
   } catch (err) {
-    res.status(500).json("Error: " + err.message);
+    next(err);
   }
 };
 
-module.exports.getConnections = async (req, res) => {
+module.exports.getConnections = async (req, res, next) => {
   try {
     const loggedUserId = req.user._id;
 
@@ -55,11 +55,11 @@ module.exports.getConnections = async (req, res) => {
       data,
     });
   } catch (err) {
-    res.status(500).json("Error :" + err.message);
+    next(err);
   }
 };
 
-module.exports.getFeed = async (req, res) => {
+module.exports.getFeed = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 2;
@@ -110,21 +110,29 @@ module.exports.getFeed = async (req, res) => {
       users,
     });
   } catch (err) {
-    console.log(err);
-
-    res.status(500).json("Error :" + err.message);
+    next(err);
   }
 };
 
 module.exports.getUserById = async (req, res, next) => {
   try {
     const userId = req.params.userId.trim();
+    if(!userId){
+      return  next(new ExpressError("no userid is provided", 400));
+
+    }
 
     const userDetails = await User.findById(userId).select(USER_SAFE_DATA);
 
+      if(!userDetails){
+      return  next(new ExpressError("Error in Finding User", 404));
+
+    }
+    
+
     res.status(200).json(userDetails);
   } catch (err) {
-    next(new ExpressError("Error in Finding User", 400));
+    next(err);
   }
 };
 
@@ -132,10 +140,20 @@ module.exports.getUserStatus = async (req, res, next) => {
   try {
     const userId = req.params.userId.trim();
 
+     if(!userId){
+      return  next(new ExpressError("no userid is provided", 400));
+
+    }
+
     const userLastSeen = await User.findById(userId).select("lastSeen");
+
+       if(!userLastSeen){
+      return  next(new ExpressError("Error in Finding User", 404));
+
+    }
 
     res.status(200).json(userLastSeen);
   } catch (err) {
-    next(new ExpressError("Error in Finding User", 400));
+    next(err);
   }
 };

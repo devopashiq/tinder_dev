@@ -10,7 +10,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RZP_KEY_SECRET,
 });
 
-module.exports.createPaymentOrder = async (req, res) => {
+module.exports.createPaymentOrder = async (req, res, next) => {
   const user = req.user;
   const { type } = req.body;
 
@@ -40,8 +40,7 @@ module.exports.createPaymentOrder = async (req, res) => {
 
     res.json(order);
   } catch (err) {
-    console.log(err);
-    res.json(err);
+    next(err);
   }
 };
 
@@ -93,7 +92,6 @@ module.exports.handleRazorpayWebhook = async (req, res, next) => {
 
     return res.status(200).json({ message: "webhook received" });
   } catch (err) {
-    console.log(err);
     next(err);
   }
 };

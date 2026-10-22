@@ -48,7 +48,6 @@ module.exports.chatWithUsers =async (req, res, next) => {
 
     res.json(chat);
   } catch (err) {
-    console.log(err);
     next(err);
   }
 }

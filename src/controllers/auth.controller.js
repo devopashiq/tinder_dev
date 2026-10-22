@@ -1,16 +1,18 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/users.js");
 const signUpvalidator = require("../utils/validator.js");
+const ExpressError = require("../utils/ExpressErrorHandler.js");
 const USER_SAFE_DATA = "firstName lastName about age skils gender photoUrl membershipType isPremium";
 
-module.exports.signUpUser=async (req, res) => {
+module.exports.signUpUser=async (req, res,next) => {
   const { firstName, lastName, password, email} = req.body;
   try {
     signUpvalidator(req);
 
     const existingUser = await User.findOne({email})
    if(existingUser){
-    return res.status(409).json({err:"Email Already Exists"})
+    return next(new ExpressError("User already exists", 409));
+
    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -34,20 +36,20 @@ module.exports.signUpUser=async (req, res) => {
     res.json( {message:"Successfully added new user" , user: newUser});
   } catch (err) {
     
-    res
-      .status(500)
-      .json({ message: "Error in Adding new user", err: err.message });
-    console.log(err);
+   
+
+    next(err)
   }
 }
 
-module.exports.loginUser=async (req, res) => {
+module.exports.loginUser=async (req, res,next) => {
   try { 
  
 
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
+
 
     if (user) {
       // isCorrect = await bcrypt.compare(password, user.password);
@@ -63,19 +65,18 @@ module.exports.loginUser=async (req, res) => {
         });
         res.status(200).json(safeUser);
       } else {
-        throw new Error("Incorrect password");
+        throw new ExpressError("Invalid email or password", 401);
       }
     } else {
-      throw new Error("User not found");
+      throw new ExpressError("Invalid email or password", 401);
     }
   } catch (err) {
-    res.status(500).json( {message:"Error in Getting all usera" , err: err.message});
-    console.log("Error in Getting all usera", err);
+     next(err)
   }
 }
 
 
-module.exports.logoutUser=async (req, res) => {
+module.exports.logoutUser=async (req, res,next) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
   });
@@ -83,7 +84,7 @@ module.exports.logoutUser=async (req, res) => {
 };
 
 
-module.exports.updateUser=async (req, res) => {
+module.exports.updateUser=async (req, res, next) => {
   try {
     const userId = req.params.userId.trim();
     const data = req.body;
@@ -93,19 +94,19 @@ module.exports.updateUser=async (req, res) => {
 
     Object.keys(req.body).forEach((key) => {
       if (notAllowedFields.includes(key)) {
-        throw new Error("Contain the fields that are not allowed to update");
+        throw new ExpressError("Email cannot be updated", 400);
       }
     });
 
     const allUsers = await User.findByIdAndUpdate(userId, data, { new: true });
     res.status(200).json(allUsers);
   } catch (err) {
-    res.status(500).send("Error in Updating a users" + err);
+    next(err);
   }
 }
 
 
-module.exports.deleteUser=async (req, res) => {
+module.exports.deleteUser=async (req, res, next) => {
  
   try {
     const userId = req.params.userId.trim();
@@ -118,7 +119,7 @@ module.exports.deleteUser=async (req, res) => {
       res.status(200).json("User dose not exist,it may already deleted");
     }
   } catch (err) {
-    res.status(500).json("Error in Deleting user" + err.message);
+    next(err);
   }
 }
 

@@ -1,4 +1,5 @@
 const User = require("../models/users");
+const ExpressError = require("../utils/ExpressErrorHandler");
 const USER_SAFE_DATA =
   "firstName lastName about age skils gender photoUrl membershipType isPremium";
 
@@ -12,7 +13,12 @@ const userAuth = async (req, res, next) => {
       return res.status(401).send("Please Login");
     }
 
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return next(new ExpressError("Invalid or expired token. Please login again.", 401));
+    }
 
     const { _id } = decodedToken;
 
@@ -28,9 +34,7 @@ const userAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    console.log(err);
-
-    res.status(400).json("Error" + err.message);
+    next(err);
   }
 };
 

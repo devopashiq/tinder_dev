@@ -9,6 +9,8 @@ require("dotenv").config();
 
 require("./utils/cronJob.js");
 
+const errorMiddleware = require("./middlewares/errorMiddlware.js")
+
 
 
 
@@ -42,19 +44,14 @@ app.use("/users", userRouter);
 app.use("/chats", chatRouter);
 app.use("/payments", paymentRouter);
 
-// app.use(mongoErrorHandling);
-
-//Error middleWare
+app.use(errorMiddleware);
 
 
 
 
 
-app.use((err, req, res, next) => {
-  return res.status(err.status ||500).json({
-    message: err.message,
-  });
-});
+
+
 
 module.exports=app
 
