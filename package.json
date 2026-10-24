@@ -4,7 +4,7 @@
   "description": "tinder for developers",
   "main": "index.js",
   "scripts": {
-    "test": "npx jest tests/integration/socketAuth.test.js",
+    "test": "npx jest tests/integration/socsocketChat.test.js",
     "dev": " nodemon src/server.js",
     "start": "node src/server.js"
   },

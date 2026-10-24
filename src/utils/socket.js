@@ -2,6 +2,8 @@ const cookie = require("cookie");
 const socket = require("socket.io");
 const ExpressError = require("../utils/ExpressErrorHandler");
 const chatModal = require("../models/chat");
+const connectionRequestmodel = require("../models/connectionRequest");
+
 const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 const USER_SAFE_DATA = "firstName lastName about age skills gender photoUrl";
@@ -74,105 +76,162 @@ const initializeSocket = (server) => {
     onlineUsers.set(socket.user._id.toString(), socket.id);
     io.emit("online-users", Array.from(onlineUsers.keys()));
 
-    socket.on("joinChat", async ({ targetUserId }) => {
-      const userId = socket.user._id.toString();
-      const targetId = targetUserId.toString();
-      const roomId = [userId, targetId].sort().join("-");
+    console.log(onlineUsers, "Online users ");
 
-      socket.join(roomId);
-
-      if (!ActiveChats.has(roomId)) {
-        ActiveChats.set(roomId, new Set());
-      }
-
-      ActiveChats.get(roomId).add(userId);
-
-      io.to(roomId).emit("userjoined", userId);
-
-      let chat = await chatModal.findOne({
-        participants: {
-          $all: [userId, targetId],
-        },
-      });
-      if (chat) {
-        const chatId = chat._id;
-
-        await chatModal.updateOne(
-          {
-            _id: chatId,
-          },
-          {
-            $set: {
-              "message.$[elem].status": "seen",
-              "message.$[elem].seenAt": new Date(),
-            },
-          },
-          {
-            arrayFilters: [
-              {
-                "elem.senderId": { $ne: userId },
-                "elem.status": { $ne: "seen" },
-              },
-            ],
-          },
-        );
-      }
-    });
-
-    socket.on("sendMessage", async ({ targetUserId, newmessages }) => {
-      const roomId = [socket.user._id.toString(), targetUserId.toString()]
-        .sort()
-        .join("-");
-
-      let status = "sent";
-
-      if (
-        ActiveChats.has(roomId) &&
-        ActiveChats.get(roomId).has(targetUserId.toString())
-      ) {
-        status = "seen";
-      } else if (onlineUsers.has(targetUserId.toString())) {
-        status = "delivered";
-      }
-
+    socket.on("joinChat", async ({ targetUserId }, callback) => {
       try {
         const userId = socket.user._id.toString();
         const targetId = targetUserId.toString();
 
-        let chat = await chatModal.findOne({
+        const connection = await connectionRequestmodel.findOne({
+          $or: [
+            { fromUserId: userId, toUserId: targetId },
+            { fromUserId: targetId, toUserId: userId },
+          ],
+          status: "accepted",
+        });
+
+        if (!connection) {
+          return callback({
+            success: false,
+            message: "You are not connected with this user",
+          });
+        }
+
+        const roomId = [userId, targetId].sort().join("-");
+
+        await socket.join(roomId);
+
+        if (!ActiveChats.has(roomId)) {
+          ActiveChats.set(roomId, new Set());
+        }
+
+        ActiveChats.get(roomId).add(userId);
+
+        io.to(roomId).emit("userjoined", userId);
+
+        const chat = await chatModal.findOne({
           participants: {
             $all: [userId, targetId],
           },
         });
 
-        if (!chat) {
-          chat = new chatModal({
-            participants: [userId, targetId],
-            message: [],
-          });
+        if (chat) {
+          await chatModal.updateOne(
+            { _id: chat._id },
+            {
+              $set: {
+                "message.$[elem].status": "seen",
+                "message.$[elem].seenAt": new Date(),
+              },
+            },
+            {
+              arrayFilters: [
+                {
+                  "elem.senderId": { $ne: userId },
+                  "elem.status": { $ne: "seen" },
+                },
+              ],
+            },
+          );
         }
 
-        chat.message.push({
-          senderId: userId,
-          text: newmessages,
-          status,
-          seenAt: status === "seen" ? new Date() : null,
-        });
-
-        const chatResult = await chat.save();
-        const message = chatResult.message[chatResult.message.length - 1];
-
-        io.to(roomId).emit("chatMessage", {
-          text: message.text,
-          userId: message.senderId.toString(),
-          status: message.status,
-          seenAt: message.seenAt,
-          createdAt: message.createdAt,
+        return callback({
+          success: true,
+          message: "Successfully joined chat",
+          roomId,
         });
       } catch (err) {
-        console.log(err);
+        console.error("joinChat failed:", err);
+
+        return callback({
+          success: false,
+          message: "Failed to join chat",
+        });
       }
     });
+
+    socket.on(
+      "sendMessage",
+      async ({ targetUserId, newmessages }, callback) => {
+        try {
+          const userId = socket.user._id.toString();
+          const targetId = targetUserId.toString();
+
+          if (userId === targetId) {
+            return callback({
+              success: false,
+              message: "You cannot send message yourslef",
+            });
+          }
+
+          const connection = await connectionRequestmodel.findOne({
+            $or: [
+              { fromUserId: userId, toUserId: targetId },
+              { fromUserId: targetId, toUserId: userId },
+            ],
+            status: "accepted",
+          });
+
+          if (!connection) {
+            return callback({
+              success: false,
+              message: "You are not connected with this user",
+            });
+          }
+          const roomId = [userId, targetId].sort().join("-");
+
+          let status = "sent";
+
+          if (
+            ActiveChats.has(roomId) &&
+            ActiveChats.get(roomId).has(targetId)
+          ) {
+            status = "seen";
+          } else if (onlineUsers.has(targetId)) {
+            status = "delivered";
+          }
+
+          let chat = await chatModal.findOne({
+            participants: {
+              $all: [userId, targetId],
+            },
+          });
+
+          if (!chat) {
+            chat = new chatModal({
+              participants: [userId, targetId],
+              message: [],
+            });
+          }
+
+          chat.message.push({
+            senderId: userId,
+            text: newmessages,
+            status,
+            seenAt: status === "seen" ? new Date() : null,
+          });
+
+          const chatResult = await chat.save();
+          const message = chatResult.message[chatResult.message.length - 1];
+
+          io.to(roomId).emit("chatMessage", {
+            text: message.text,
+            userId: message.senderId.toString(),
+            status: message.status,
+            seenAt: message.seenAt,
+            createdAt: message.createdAt,
+          });
+        } catch (err) {
+          console.error("sendMessage failed:", err);
+
+          return callback({
+            success: false,
+            message: "Failed to send chat",
+          });
+        }
+      },
+    );
 
     socket.on("UserTyping", async ({ typing, targetUserId }) => {
       const roomId = [socket.user._id.toString(), targetUserId.toString()]

@@ -54,6 +54,8 @@ describe("Socket.IO authentication middleware", () => {
 
     const { port } = httpServer.address();
     socketUrl = `http://127.0.0.1:${port}`;
+
+    console.log(socketUrl)
   });
 
   afterEach(() => {
